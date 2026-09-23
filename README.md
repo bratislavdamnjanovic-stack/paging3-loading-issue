@@ -37,11 +37,12 @@ re-emit fresh `PagingData`. That re-emission is the trigger the bug needs — an
 A single screen renders a paged grid of remote images (`picsum.photos`). A switch at the top
 flips the `LazyVerticalGrid` key strategy:
 
-- **CONTENT key** (switch off, default) — `key = { peek(it)?.let { "${it.id}_${it.messageId}" } ?: index }`
-  Same shape as `mediaItems.itemKey { "${item.id}_${item.messageId}" }`.
-  **On-screen tiles blink / reload while scrolling.** On each Room re-emission `peek(index)`
-  transiently returns `null`, so the key toggles between the content key and the placeholder
-  index, disposing the tile composition and resetting GlideImage's loaded state.
+- **CONTENT key** (switch off, default) — `key = mediaItems.itemKey { "${it.id}_${it.messageId}" }`
+  The docs-recommended `LazyPagingItems.itemKey` extension.
+  **On-screen tiles blink / reload while scrolling.** With placeholders enabled, on each Room
+  re-emission a still-visible item can transiently present as `null`, so `itemKey` substitutes
+  its placeholder key for that position; the key flips between the content key and the
+  placeholder key, disposing the tile composition and resetting GlideImage's loaded state.
 
 - **INDEX key** (switch on) — `key = { index -> index }`
   No blink (keys are position-stable so compositions survive re-emission), but tiles shift on delete.
